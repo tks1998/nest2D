@@ -112,5 +112,51 @@ PYBIND11_MODULE(nest2D, m)
                  return r;
              }
         );
+    py::class_<Item>(m, "Item", "An item to be placed on a bin.")
+        .def(py::init<std::vector<Point>>())
+        .def("__repr__",
+             [](const Item &i) {
+                 std::string r("Item(area: ");
+                 r += boost::lexical_cast<std::string>(i.area());
+                 r += ", bin_id: ";
+                 r += boost::lexical_cast<std::string>(i.binId());
+                 r += ", vertices: ";
+                 r += boost::lexical_cast<std::string>(i.vertexCount());
+                 r += ", rotation: ";
+                 r += boost::lexical_cast<std::string>(i.rotation());
+                 r += ", translation: ";
+                 r += boost::lexical_cast<std::string>(i.translation());
+                 r += ")";
+                 return r;
+             }
+        )
+        .def("get_rotation",
+             [](const Item &i) {
+                 double rot;
+                 rot = i.rotation();
+                 return rot;
+             }
+        )
+        .def("get_translation",
+             [](const Item &i) {
+                 ClipperLib::IntPoint t = i.translation();
+                 std::vector<int> v;
+                 v.push_back(t.X);
+                 v.push_back(t.Y);
+                 return py::array(v.size(), v.data());
+             }
+        )
+        .def("get_vertices",
+             [](const Item &i) {
+                 py::array_t<double> arr({int(i.vertexCount()), 2 });
+                 auto r = arr.mutable_unchecked<2>();
+                 for (unsigned int j=0; j<int(i.vertexCount()); j++){
+                     r(j,0) = i.vertex(j).X;
+                     r(j,1) = i.vertex(j).Y;
+                 }
+                 return arr;
+             }
+        )
+        ;
 
 }
